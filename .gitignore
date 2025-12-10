@@ -1,0 +1,15 @@
+# Node
+node_modules/
+.env
+package-lock.json
+
+# Logs
+logs/
+*.log
+
+# Puppeteer Cache
+~/.cache/puppeteer
+
+# Build Files
+dist/
+build/
