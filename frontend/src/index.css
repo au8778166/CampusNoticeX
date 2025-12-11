@@ -1,0 +1,13 @@
+@import "tailwindcss";
+body {
+  @apply bg-linear-to-br from-purple-50 to-blue-50;
+}
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.4s ease-in-out;
+}
+

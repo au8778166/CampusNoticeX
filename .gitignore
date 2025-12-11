@@ -1,15 +1,49 @@
-# Node
+# --------------------
+# GLOBAL IGNORE
+# --------------------
 node_modules/
-.env
-package-lock.json
-
-# Logs
-logs/
-*.log
-
-# Puppeteer Cache
-~/.cache/puppeteer
-
-# Build Files
 dist/
 build/
+.env
+.env.local
+.env.*.local
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor folders
+.vscode/
+.idea/
+
+# --------------------
+# BACKEND IGNORE
+# --------------------
+/backend/node_modules/
+/backend/.env
+/backend/.cache/
+/backend/logs/
+/backend/src/scraper/screenshots/
+/backend/src/scraper/temp/
+/backend/uploads/
+
+# Puppeteer Chromium Cache
+.backup/
+.puppeteer/
+ChromeProfile/
+.cache/
+
+# --------------------
+# FRONTEND IGNORE
+# --------------------
+/frontend/node_modules/
+/frontend/dist/
+/frontend/.env
+/frontend/.cache/
