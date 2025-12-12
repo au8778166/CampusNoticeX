@@ -5,7 +5,7 @@ import Navbar from "../components/Navbar";
 import SearchBar from "../components/SearchBar";
 import NoticeCard from "../components/NoticeCard";
 import CategoryFilter from "../components/CategoryFilter";
-import api from "../api";
+
 const API_URL = import.meta.env.VITE_API_URL;
 
 export default function Home() {
@@ -15,21 +15,41 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
+  // Pagination State
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+
   // Sort newest → oldest
   const sortByLatest = (data) =>
     data.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-  // Fetch all notices
-  const fetchNotices = async () => {
+  /* -------------------------------------------------
+     Fetch notices by page (10 per page)
+  ------------------------------------------------- */
+  const fetchNotices = async (pageNum = 1) => {
     setLoading(true);
-    const res = await axios.get(`${API_URL}/api/notices`);
-    const sorted = sortByLatest(res.data);
-    setNotices(sorted);
-    setFilteredNotices(sorted);
+
+    const res = await axios.get(`${API_URL}/api/notices/page/${pageNum}`);
+
+    const newData = sortByLatest(res.data.notices);
+
+    // Page 1 → fresh load
+    if (pageNum === 1) {
+      setNotices(newData);
+      setFilteredNotices(newData);
+    } else {
+      // Load more → append
+      setNotices((prev) => [...prev, ...newData]);
+      setFilteredNotices((prev) => [...prev, ...newData]);
+    }
+
+    setTotalPages(res.data.totalPages);
     setLoading(false);
   };
 
-  // Search logic
+  /* -------------------------------------------------
+     Search Filtering
+  ------------------------------------------------- */
   useEffect(() => {
     if (!search.trim()) {
       setFilteredNotices(
@@ -41,9 +61,9 @@ export default function Home() {
     }
 
     const timeout = setTimeout(() => {
-      const query = search.toLowerCase();
+      const q = search.toLowerCase();
       const results = notices.filter((n) =>
-        n.title.toLowerCase().includes(query)
+        n.title.toLowerCase().includes(q)
       );
       setFilteredNotices(results);
     }, 300);
@@ -51,18 +71,24 @@ export default function Home() {
     return () => clearTimeout(timeout);
   }, [search, notices, category]);
 
-  // Category filter
+  /* -------------------------------------------------
+     Category Filtering
+  ------------------------------------------------- */
   useEffect(() => {
     if (category === "All") {
       setFilteredNotices(notices);
     } else {
-      setFilteredNotices(notices.filter((n) => n.category === category));
+      setFilteredNotices(
+        notices.filter((n) => n.category === category)
+      );
     }
   }, [category]);
 
-  // Initial Fetch
+  /* -------------------------------------------------
+     Initial Fetch
+  ------------------------------------------------- */
   useEffect(() => {
-    fetchNotices();
+    fetchNotices(1);
   }, []);
 
   return (
@@ -74,7 +100,8 @@ export default function Home() {
       <div className="max-w-4xl mx-auto p-6">
 
         {/* Heading */}
-        <h1 className="text-4xl font-extrabold text-center mb-6 bg-linear-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+        <h1 className="text-4xl font-extrabold text-center mb-6 
+          bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
           📌 Campus Notice Board
         </h1>
 
@@ -89,24 +116,42 @@ export default function Home() {
           Latest Notices
         </h2>
 
-        {/* Display States */}
-        {loading ? (
-          <p className="text-center mt-10 text-gray-500 text-lg animate-pulse">
-            Loading notices...
-          </p>
-        ) : filteredNotices.length === 0 ? (
+        {/* Main Listing */}
+        {filteredNotices.length === 0 && !loading ? (
           <p className="text-center mt-10 text-gray-500 text-lg">
             No notices found.
           </p>
         ) : (
           <div className="mt-4 flex flex-col gap-4 animate-fadeIn">
-            {filteredNotices.map((notice) => (
-              <NoticeCard key={notice._id} notice={notice} />
+            {filteredNotices.map((n) => (
+              <NoticeCard key={n._id} notice={n} />
             ))}
           </div>
+        )}
+
+        {/* Pagination: Load More */}
+        {page < totalPages && !loading && (
+          <div className="text-center mt-6">
+            <button
+              onClick={() => {
+                setPage(page + 1);
+                fetchNotices(page + 1);
+              }}
+              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold 
+              shadow hover:bg-blue-700 transition"
+            >
+              Load More
+            </button>
+          </div>
+        )}
+
+        {/* Loading indicator */}
+        {loading && (
+          <p className="text-center mt-6 text-gray-500 animate-pulse">
+            Loading...
+          </p>
         )}
       </div>
     </>
   );
 }
-
