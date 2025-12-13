@@ -1,5 +1,4 @@
-import dotenv from "dotenv";
-dotenv.config();
+
 
 import mongoose from "mongoose";
 import app from "./app.js";
@@ -16,6 +15,8 @@ async function start() {
     app.listen(PORT, () => {
       console.log(`Server running on port ${PORT}`);
     });
+  
+
 
     // Run scraper immediately on server start
     console.log("🚀 Running first scrape...");

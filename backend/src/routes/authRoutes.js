@@ -4,7 +4,7 @@ import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
 const router = express.Router();
-const JWT_SECRET = process.env.JWT_SECRET;
+//const JWT_SECRET = process.env.JWT_SECRET;
 
 /* ---------------- SIGNUP ---------------- */
 router.post("/signup", async (req, res) => {
@@ -55,7 +55,7 @@ router.post("/login", async (req, res) => {
 
     const token = jwt.sign(
       { userId: user._id, role: user.role },
-      JWT_SECRET,
+      process.env.JWT_SECRET,
       { expiresIn: "7d" }
     );
 

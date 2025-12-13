@@ -1,7 +1,7 @@
 import webpush from "web-push";
 import Subscription from "../models/Subscription.js";
-import dotenv from "dotenv";
-dotenv.config();
+//import dotenv from "dotenv";
+//dotenv.config();
 webpush.setVapidDetails(
   "mailto:admin@example.com",
   process.env.VAPID_PUBLIC_KEY,
