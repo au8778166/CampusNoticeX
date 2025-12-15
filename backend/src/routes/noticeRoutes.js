@@ -1,6 +1,6 @@
 import express from "express";
 import Notice from "../models/Notice.js";
-
+import { protect } from "../middleware/auth.js";
 const router = express.Router();
 
 /* ------------------------------------------------------
@@ -155,10 +155,12 @@ router.get("/stats/weekly", async (req, res) => {
 /* ------------------------------------------------------
    9️⃣ Get Notice by ID
 ------------------------------------------------------ */
-router.get("/:id", async (req, res) => {
+router.get("/:id",protect, async (req, res) => {
   try {
     const notice = await Notice.findById(req.params.id);
-    if (!notice) return res.status(404).json({ message: "Notice not found" });
+    if (!notice) {
+      return res.status(404).json({ message: "Notice not found" });
+    }
     res.json(notice);
   } catch (error) {
     res.status(500).json({ error: error.message });
