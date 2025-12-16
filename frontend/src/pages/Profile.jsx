@@ -10,7 +10,7 @@ export default function Profile() {
 
   if (!user) {
     return (
-      <p className="text-center mt-20 text-gray-600">
+      <p className="text-center mt-20 text-gray-600 animate-pulse">
         Loading profile...
       </p>
     );
@@ -28,46 +28,88 @@ export default function Profile() {
       });
 
       navigate("/login");
-      window.location.reload(); // reset auth state
+      window.location.reload();
     } catch (err) {
       alert("Failed to delete account");
     }
   };
 
   return (
-    <div className="max-w-xl mx-auto mt-16 p-6 bg-white shadow rounded-lg">
+    <div
+      className="min-h-screen flex items-center justify-center
+      bg-gradient-to-br from-purple-100 via-blue-50 to-indigo-100 px-4"
+    >
+      {/* Card */}
+      <div
+        className="w-full max-w-xl p-8 rounded-2xl
+        bg-white/80 backdrop-blur-xl
+        shadow-2xl border border-white/30 animate-fadeIn"
+      >
+        {/* Avatar */}
+        <div className="flex justify-center mb-6">
+          <div
+            className="w-24 h-24 rounded-full
+            bg-gradient-to-r from-purple-600 to-blue-500
+            flex items-center justify-center
+            text-white text-3xl font-bold shadow-lg"
+          >
+            {user.name?.charAt(0).toUpperCase() || "U"}
+          </div>
+        </div>
 
-      <h1 className="text-3xl font-bold text-center mb-6">
-        👤 Profile
-      </h1>
-
-      <div className="space-y-4 text-lg">
-        <p>
-          <span className="font-semibold">Name:</span> {user.name}
-        </p>
-        <p>
-          <span className="font-semibold">Email:</span> {user.email}
-        </p>
-        <p>
-          <span className="font-semibold">Joined:</span>{" "}
-          {new Date(user.createdAt).toLocaleDateString()}
-        </p>
-      </div>
-
-      <div className="mt-8 flex gap-4">
-        <button
-          onClick={logout}
-          className="flex-1 bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
+        {/* Title */}
+        <h1
+          className="text-3xl font-extrabold text-center mb-6
+          bg-gradient-to-r from-purple-600 to-blue-500
+          bg-clip-text text-transparent"
         >
-          Logout
-        </button>
+          Profile
+        </h1>
 
-        <button
-          onClick={handleDelete}
-          className="flex-1 bg-red-600 text-white py-2 rounded hover:bg-red-700 transition"
-        >
-          Delete Account
-        </button>
+        {/* Info */}
+        <div className="space-y-4 text-gray-700 text-lg">
+          <div className="flex justify-between">
+            <span className="font-semibold">Name</span>
+            <span>{user.name}</span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-semibold">Email</span>
+            <span className="truncate max-w-[60%] text-right">
+              {user.email}
+            </span>
+          </div>
+
+          <div className="flex justify-between">
+            <span className="font-semibold">Joined</span>
+            <span>
+              {new Date(user.createdAt).toLocaleDateString()}
+            </span>
+          </div>
+        </div>
+
+        {/* Actions */}
+        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <button
+            onClick={logout}
+            className="py-3 rounded-xl font-semibold text-white
+            bg-gradient-to-r from-blue-600 to-indigo-600
+            hover:scale-[1.03] hover:shadow-xl
+            transition-all duration-300"
+          >
+            Logout
+          </button>
+
+          <button
+            onClick={handleDelete}
+            className="py-3 rounded-xl font-semibold text-white
+            bg-gradient-to-r from-red-600 to-pink-600
+            hover:scale-[1.03] hover:shadow-xl
+            transition-all duration-300"
+          >
+            Delete Account
+          </button>
+        </div>
       </div>
     </div>
   );

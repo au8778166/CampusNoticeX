@@ -15,74 +15,64 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  // Pagination State
+  // Pagination
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  // Sort newest → oldest
-  const sortByLatest = (data) =>
-    data.sort((a, b) => new Date(b.date) - new Date(a.date));
-
   /* -------------------------------------------------
-     Fetch notices by page (10 per page)
+     ✅ SAFE DATE PARSER (DD/MM/YYYY → Date)
   ------------------------------------------------- */
-  const fetchNotices = async (pageNum = 1) => {
-    setLoading(true);
+  const parseDate = (dateStr) => {
+    if (!dateStr) return new Date(0);
 
-    const res = await axios.get(`${API_URL}/api/notices/page/${pageNum}`);
-
-    const newData = sortByLatest(res.data.notices);
-
-    // Page 1 → fresh load
-    if (pageNum === 1) {
-      setNotices(newData);
-      setFilteredNotices(newData);
-    } else {
-      // Load more → append
-      setNotices((prev) => [...prev, ...newData]);
-      setFilteredNotices((prev) => [...prev, ...newData]);
+    // If backend already sends ISO date
+    if (!dateStr.includes("/")) {
+      return new Date(dateStr);
     }
 
-    setTotalPages(res.data.totalPages);
-    setLoading(false);
+    // DD/MM/YYYY
+    const [day, month, year] = dateStr.split("/");
+    return new Date(year, month - 1, day);
   };
 
   /* -------------------------------------------------
-     Search Filtering
+     ✅ GLOBAL SORT (Newest → Oldest)
   ------------------------------------------------- */
-  useEffect(() => {
-    if (!search.trim()) {
-      setFilteredNotices(
-        category === "All"
-          ? notices
-          : notices.filter((n) => n.category === category)
-      );
-      return;
-    }
-
-    const timeout = setTimeout(() => {
-      const q = search.toLowerCase();
-      const results = notices.filter((n) =>
-        n.title.toLowerCase().includes(q)
-      );
-      setFilteredNotices(results);
-    }, 300);
-
-    return () => clearTimeout(timeout);
-  }, [search, notices, category]);
+  const sortByLatest = (data) =>
+    data.sort((a, b) => parseDate(b.date) - parseDate(a.date));
 
   /* -------------------------------------------------
-     Category Filtering
+     Fetch Notices (Paginated)
   ------------------------------------------------- */
-  useEffect(() => {
-    if (category === "All") {
-      setFilteredNotices(notices);
-    } else {
-      setFilteredNotices(
-        notices.filter((n) => n.category === category)
+  const fetchNotices = async (pageNum = 1) => {
+    try {
+      setLoading(true);
+
+      const res = await axios.get(
+        `${API_URL}/api/notices/page/${pageNum}`
       );
+
+      const incoming = res.data.notices || [];
+
+      setNotices((prev) =>
+        pageNum === 1
+          ? sortByLatest([...incoming])
+          : sortByLatest([...prev, ...incoming])
+      );
+
+      setFilteredNotices((prev) =>
+        pageNum === 1
+          ? sortByLatest([...incoming])
+          : sortByLatest([...prev, ...incoming])
+      );
+
+      setTotalPages(res.data.totalPages || 1);
+    } catch (err) {
+      console.error("Failed to fetch notices", err);
+    } finally {
+      setLoading(false);
     }
-  }, [category]);
+  };
 
   /* -------------------------------------------------
      Initial Fetch
@@ -91,37 +81,62 @@ export default function Home() {
     fetchNotices(1);
   }, []);
 
+  /* -------------------------------------------------
+     Search + Category Filtering
+  ------------------------------------------------- */
+  useEffect(() => {
+    let data = [...notices];
+
+    if (category !== "All") {
+      data = data.filter((n) => n.category === category);
+    }
+
+    if (search.trim()) {
+      const q = search.toLowerCase();
+      data = data.filter((n) =>
+        n.title.toLowerCase().includes(q)
+      );
+    }
+
+    setFilteredNotices(data);
+  }, [search, category, notices]);
+
   return (
     <>
-      {/* Navbar */}
       <Navbar />
 
-      {/* Main Container */}
       <div className="max-w-4xl mx-auto p-6">
 
         {/* Heading */}
         <h1 className="text-4xl font-extrabold text-center mb-6 
-          bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
+          bg-gradient-to-r from-purple-600 to-blue-500 
+          bg-clip-text text-transparent">
           📌 Campus Notice Board
         </h1>
 
-        {/* Search Bar */}
+        {/* Search */}
         <SearchBar value={search} onChange={setSearch} />
 
-        {/* Category Filter */}
-        <CategoryFilter selected={category} setSelected={setCategory} />
+        {/* Category */}
+        <CategoryFilter
+          selected={category}
+          setSelected={setCategory}
+        />
 
         {/* Section Title */}
         <h2 className="text-2xl font-semibold mt-8 mb-3 text-center text-gray-800">
           Latest Notices
         </h2>
 
-        {/* Main Listing */}
-        {filteredNotices.length === 0 && !loading ? (
+        {/* Empty State */}
+        {!loading && filteredNotices.length === 0 && (
           <p className="text-center mt-10 text-gray-500 text-lg">
             No notices found.
           </p>
-        ) : (
+        )}
+
+        {/* Notice List */}
+        {filteredNotices.length > 0 && (
           <div className="mt-4 flex flex-col gap-4 animate-fadeIn">
             {filteredNotices.map((n) => (
               <NoticeCard key={n._id} notice={n} />
@@ -129,23 +144,25 @@ export default function Home() {
           </div>
         )}
 
-        {/* Pagination: Load More */}
+        {/* Load More */}
         {page < totalPages && !loading && (
           <div className="text-center mt-6">
             <button
               onClick={() => {
-                setPage(page + 1);
-                fetchNotices(page + 1);
+                const nextPage = page + 1;
+                setPage(nextPage);
+                fetchNotices(nextPage);
               }}
-              className="px-6 py-3 bg-blue-600 text-white rounded-lg font-semibold 
-              shadow hover:bg-blue-700 transition"
+              className="px-6 py-3 bg-blue-600 text-white 
+              rounded-lg font-semibold shadow 
+              hover:bg-blue-700 transition"
             >
               Load More
             </button>
           </div>
         )}
 
-        {/* Loading indicator */}
+        {/* Loading */}
         {loading && (
           <p className="text-center mt-6 text-gray-500 animate-pulse">
             Loading...

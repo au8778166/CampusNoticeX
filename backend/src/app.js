@@ -6,7 +6,7 @@ import noticeRoutes from "./routes/noticeRoutes.js";
 import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js"
-
+import aiRoutes from "./routes/aiRoutes.js";
 const app = express();
 app.use(
   cors({
@@ -20,6 +20,7 @@ app.use(express.json());
 app.use("/api/auth", authRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/user", userRoutes);
+app.use("/api/ai", aiRoutes);
 
 
 
