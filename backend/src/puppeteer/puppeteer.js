@@ -8,7 +8,7 @@ export async function scrape() {
   console.log("🔎 Scraping started...");
 
   const browser = await puppeteer.launch({
-    headless: true,
+    headless: "new",
     args: ["--no-sandbox", "--disable-setuid-sandbox"],
   });
 

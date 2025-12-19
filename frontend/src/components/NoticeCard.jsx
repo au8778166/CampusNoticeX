@@ -1,14 +1,9 @@
 import { Link } from "react-router-dom";
 
-/* -----------------------------------------
-   Utility: Relative Date (UX boost)
------------------------------------------- */
 const getRelativeDate = (dateStr) => {
   const date = new Date(dateStr);
   const now = new Date();
-  const diff = Math.floor(
-    (now - date) / (1000 * 60 * 60 * 24)
-  );
+  const diff = Math.floor((now - date) / (1000 * 60 * 60 * 24));
 
   if (diff === 0) return "Today";
   if (diff === 1) return "Yesterday";
@@ -19,47 +14,53 @@ const getRelativeDate = (dateStr) => {
 
 export default function NoticeCard({ notice }) {
   return (
-    <Link to={`/notice/${notice._id}`} className="group">
+    <Link to={`/notice/${notice._id}`} className="group block h-full">
       <div
-        className="relative overflow-hidden 
-        bg-white p-5 rounded-2xl border border-gray-200
-        shadow-md transition-all duration-300
+        className="relative h-full flex flex-col justify-between
+        overflow-hidden 
+        bg-black/50 backdrop-blur-lg 
+        p-5 rounded-2xl 
+        border border-white/10
+        shadow-lg transition-all duration-300
         hover:shadow-2xl hover:-translate-y-1"
       >
+        {/* Accent Bar */}
+        <div
+          className="absolute left-0 top-0 h-full w-1 
+          bg-gradient-to-b from-emerald-400 via-cyan-400 to-blue-500"
+        />
 
-        {/* Gradient Accent Bar */}
-        <div className="absolute left-0 top-0 h-full w-1 
-          bg-gradient-to-b from-purple-600 to-blue-500" />
-
-        {/* Header */}
-        <div className="flex justify-between items-start gap-3">
+        {/* Content */}
+        <div>
+          {/* Title (fixed height using line clamp) */}
           <h3
-            className="font-semibold text-lg text-gray-800 
-            leading-snug group-hover:text-purple-600 
-            transition-colors"
+            className="font-semibold text-lg text-gray-100 
+            leading-snug mb-3
+            line-clamp-2
+            group-hover:text-cyan-300 transition-colors"
           >
             {notice.title}
           </h3>
 
+          {/* Category */}
           <span
-            className="shrink-0 text-xs font-semibold px-3 py-1 
+            className="inline-block text-xs font-semibold px-3 py-1 
             rounded-full text-white 
-            bg-gradient-to-r from-purple-600 to-indigo-500"
+            bg-gradient-to-r from-emerald-500 to-cyan-500"
           >
             {notice.category || "General"}
           </span>
         </div>
 
-        {/* Meta */}
-        <div className="flex items-center justify-between mt-4">
-          <p className="text-sm text-gray-500 flex items-center gap-1">
+        {/* Footer */}
+        <div className="flex items-center justify-between mt-6">
+          <p className="text-sm text-gray-400">
             📅 {getRelativeDate(notice.date)}
           </p>
 
           <span
-            className="text-sm font-medium text-blue-600 
-            opacity-0 group-hover:opacity-100 
-            transition-opacity"
+            className="text-sm font-medium text-cyan-400 
+            opacity-0 group-hover:opacity-100 transition-opacity"
           >
             View →
           </span>
@@ -70,7 +71,8 @@ export default function NoticeCard({ notice }) {
           className="absolute inset-0 rounded-2xl 
           opacity-0 group-hover:opacity-100 
           transition pointer-events-none
-          bg-gradient-to-r from-purple-100/30 to-blue-100/30"
+          bg-gradient-to-r 
+          from-emerald-400/10 via-cyan-400/10 to-blue-400/10"
         />
       </div>
     </Link>

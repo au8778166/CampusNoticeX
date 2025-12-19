@@ -15,58 +15,41 @@ export default function Home() {
   const [category, setCategory] = useState("All");
   const [loading, setLoading] = useState(true);
 
-  // Pagination
-  const [page, setPage] = useState(1);
-  const [totalPages, setTotalPages] = useState(1);
-
-  /* -------------------------------------------------
-     ✅ SAFE DATE PARSER (DD/MM/YYYY → Date)
-  ------------------------------------------------- */
+  /* ---------------- SAFE DATE PARSER ---------------- */
   const parseDate = (dateStr) => {
     if (!dateStr) return new Date(0);
-
-    // If backend already sends ISO date
-    if (!dateStr.includes("/")) {
-      return new Date(dateStr);
-    }
-
-    // DD/MM/YYYY
+    if (!dateStr.includes("/")) return new Date(dateStr);
     const [day, month, year] = dateStr.split("/");
     return new Date(year, month - 1, day);
   };
 
-  /* -------------------------------------------------
-     ✅ GLOBAL SORT (Newest → Oldest)
-  ------------------------------------------------- */
+  /* ---------------- SORT BY LATEST ---------------- */
   const sortByLatest = (data) =>
     data.sort((a, b) => parseDate(b.date) - parseDate(a.date));
 
-  /* -------------------------------------------------
-     Fetch Notices (Paginated)
-  ------------------------------------------------- */
-  const fetchNotices = async (pageNum = 1) => {
+  /* ---------------- FETCH ALL PAGES ---------------- */
+  const fetchAllNotices = async () => {
     try {
       setLoading(true);
 
-      const res = await axios.get(
-        `${API_URL}/api/notices/page/${pageNum}`
-      );
+      let page = 1;
+      let totalPages = 1;
+      let allNotices = [];
 
-      const incoming = res.data.notices || [];
+      while (page <= totalPages) {
+        const res = await axios.get(
+          `${API_URL}/api/notices/page/${page}`
+        );
 
-      setNotices((prev) =>
-        pageNum === 1
-          ? sortByLatest([...incoming])
-          : sortByLatest([...prev, ...incoming])
-      );
+        totalPages = res.data.totalPages;
+        allNotices.push(...res.data.notices);
+        page++;
+      }
 
-      setFilteredNotices((prev) =>
-        pageNum === 1
-          ? sortByLatest([...incoming])
-          : sortByLatest([...prev, ...incoming])
-      );
+      const sorted = sortByLatest(allNotices);
 
-      setTotalPages(res.data.totalPages || 1);
+      setNotices(sorted);
+      setFilteredNotices(sorted);
     } catch (err) {
       console.error("Failed to fetch notices", err);
     } finally {
@@ -74,16 +57,12 @@ export default function Home() {
     }
   };
 
-  /* -------------------------------------------------
-     Initial Fetch
-  ------------------------------------------------- */
+  /* ---------------- INITIAL FETCH ---------------- */
   useEffect(() => {
-    fetchNotices(1);
+    fetchAllNotices();
   }, []);
 
-  /* -------------------------------------------------
-     Search + Category Filtering
-  ------------------------------------------------- */
+  /* ---------------- SEARCH + FILTER ---------------- */
   useEffect(() => {
     let data = [...notices];
 
@@ -105,69 +84,66 @@ export default function Home() {
     <>
       <Navbar />
 
-      <div className="max-w-4xl mx-auto p-6">
+      {/* 🌑 DARK UI BACKGROUND */}
+      <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-cyan-900 to-black">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 py-6">
 
-        {/* Heading */}
-        <h1 className="text-4xl font-extrabold text-center mb-6 
-          bg-gradient-to-r from-purple-600 to-blue-500 
-          bg-clip-text text-transparent">
-          📌 Campus Notice Board
-        </h1>
+          {/* Heading */}
+          <h1
+            className="text-3xl sm:text-4xl font-extrabold 
+            text-center mb-6 
+            bg-gradient-to-r from-emerald-300 to-cyan-300 
+            bg-clip-text text-transparent"
+          >
+            📌 Campus Notice Board
+          </h1>
 
-        {/* Search */}
-        <SearchBar value={search} onChange={setSearch} />
-
-        {/* Category */}
-        <CategoryFilter
-          selected={category}
-          setSelected={setCategory}
-        />
-
-        {/* Section Title */}
-        <h2 className="text-2xl font-semibold mt-8 mb-3 text-center text-gray-800">
-          Latest Notices
-        </h2>
-
-        {/* Empty State */}
-        {!loading && filteredNotices.length === 0 && (
-          <p className="text-center mt-10 text-gray-500 text-lg">
-            No notices found.
-          </p>
-        )}
-
-        {/* Notice List */}
-        {filteredNotices.length > 0 && (
-          <div className="mt-4 flex flex-col gap-4 animate-fadeIn">
-            {filteredNotices.map((n) => (
-              <NoticeCard key={n._id} notice={n} />
-            ))}
+          {/* Search */}
+          <div className="bg-black/40 backdrop-blur-md p-4 rounded-xl shadow mb-4">
+            <SearchBar value={search} onChange={setSearch} />
           </div>
-        )}
 
-        {/* Load More */}
-        {page < totalPages && !loading && (
-          <div className="text-center mt-6">
-            <button
-              onClick={() => {
-                const nextPage = page + 1;
-                setPage(nextPage);
-                fetchNotices(nextPage);
-              }}
-              className="px-6 py-3 bg-blue-600 text-white 
-              rounded-lg font-semibold shadow 
-              hover:bg-blue-700 transition"
+          {/* Category Filter */}
+          <div className="bg-black/40 backdrop-blur-md p-4 rounded-xl shadow mb-6">
+            <CategoryFilter
+              selected={category}
+              setSelected={setCategory}
+            />
+          </div>
+
+          {/* Section Title */}
+          <h2 className="text-xl sm:text-2xl font-semibold mt-8 mb-6 text-center text-gray-100">
+            Latest Notices
+          </h2>
+
+          {/* Loading */}
+          {loading && (
+            <p className="text-center mt-10 text-gray-400 animate-pulse">
+              Loading notices...
+            </p>
+          )}
+
+          {/* Empty State */}
+          {!loading && filteredNotices.length === 0 && (
+            <p className="text-center mt-10 text-gray-400">
+              No notices found.
+            </p>
+          )}
+
+          {/* 🔳 GRID (ALL NOTICES, SAME HEIGHT) */}
+          {!loading && filteredNotices.length > 0 && (
+            <div
+              className="grid gap-6 items-stretch animate-fadeIn
+              grid-cols-1 
+              sm:grid-cols-2 
+              lg:grid-cols-3"
             >
-              Load More
-            </button>
-          </div>
-        )}
-
-        {/* Loading */}
-        {loading && (
-          <p className="text-center mt-6 text-gray-500 animate-pulse">
-            Loading...
-          </p>
-        )}
+              {filteredNotices.map((n) => (
+                <NoticeCard key={n._id} notice={n} />
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </>
   );

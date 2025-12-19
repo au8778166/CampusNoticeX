@@ -7,10 +7,11 @@ import cookieParser from "cookie-parser";
 import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js"
 import aiRoutes from "./routes/aiRoutes.js";
+
 const app = express();
 app.use(
   cors({
-    origin: "http://localhost:5173", // frontend URL
+    origin: process.env.FRONTEND_URL, // frontend URL
     credentials: true,               // allow cookies
   })
 );
@@ -21,6 +22,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/notices", noticeRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/ai", aiRoutes);
+
 
 
 

@@ -12,8 +12,9 @@ export default function NoticeDetails() {
   const [summary, setSummary] = useState("");
   const [loadingSummary, setLoadingSummary] = useState(false);
 
-
-  // 🔗 Share logic
+  /* -----------------------------
+     Share logic
+  ----------------------------- */
   const handleShare = async (notice) => {
     const shareUrl = notice.link || window.location.href;
     const shareText = `📢 Notice: ${notice.title}\n\nCheck here: ${shareUrl}`;
@@ -35,12 +36,14 @@ export default function NoticeDetails() {
     window.open(whatsappUrl, "_blank");
   };
 
-  // 🔐 Fetch protected notice
+  /* -----------------------------
+     Fetch protected notice
+  ----------------------------- */
   const fetchNotice = async () => {
     try {
       const res = await axios.get(
         `${API_URL}/api/notices/${id}`,
-        { withCredentials: true } // 🔥 REQUIRED
+        { withCredentials: true }
       );
       setNotice(res.data);
     } catch (err) {
@@ -58,21 +61,27 @@ export default function NoticeDetails() {
 
   if (error) {
     return (
-      <p className="text-center mt-20 text-red-600 text-xl">{error}</p>
+      <p className="text-center mt-20 text-red-400 text-xl">
+        {error}
+      </p>
     );
   }
 
   if (!notice) {
     return (
-      <p className="text-center mt-20 text-gray-600 text-xl">Loading…</p>
+      <p className="text-center mt-20 text-gray-400 text-xl">
+        Loading…
+      </p>
     );
   }
 
-  //Summary of Notice
+  /* -----------------------------
+     AI Summary
+  ----------------------------- */
   const generateSummary = async () => {
     try {
       setLoadingSummary(true);
-  
+
       const res = await axios.post(
         `${API_URL}/api/ai/summarize`,
         {
@@ -81,110 +90,137 @@ export default function NoticeDetails() {
         },
         { withCredentials: true }
       );
-  
+
       setSummary(res.data.summary);
-    } catch (err) {
+    } catch {
       setSummary("Failed to generate summary.");
     } finally {
       setLoadingSummary(false);
     }
   };
-  
 
   return (
-    <div className="max-w-3xl mx-auto px-4 py-8">
-  
-      {/* Back */}
-      <Link
-        to="/"
-        className="inline-flex items-center gap-1 text-blue-600 font-medium hover:underline"
-      >
-        ← Back to Notices
-      </Link>
-  
-      {/* Main Card */}
-      <div className="mt-6 bg-white rounded-2xl shadow-lg p-6 border">
-  
-        {/* Title */}
-        <h1 className="text-3xl font-extrabold leading-snug bg-gradient-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-          {notice.title}
-        </h1>
-  
-        {/* Meta */}
-        <div className="flex flex-wrap items-center gap-3 mt-4">
-          <span className="text-sm px-3 py-1 rounded-full text-white bg-purple-600">
-            {notice.category || "General"}
-          </span>
-  
-          <span className="text-sm text-gray-600 flex items-center gap-1">
-            📅 {new Date(notice.date).toLocaleDateString()}
-          </span>
-        </div>
-  
-        <hr className="my-6" />
-  
-        {/* Description */}
-        <p className="text-gray-700 leading-relaxed text-lg">
-          This notice has been officially published by
-          <span className="font-semibold"> IIIT Bhopal</span>.
-          Please refer to the official document for complete details.
-        </p>
-  
-        {/* 🧠 AI Summary Section */}
-        <div className="mt-8 p-5 rounded-xl bg-gradient-to-r from-purple-50 to-blue-50 border">
-          <h2 className="text-xl font-bold mb-3 flex items-center gap-2">
-            🧠 AI Summary
-          </h2>
-  
-          {!summary && !loadingSummary && (
-            <button
-              onClick={generateSummary}
-              className="px-4 py-2 bg-purple-600 text-white rounded-lg 
-                         hover:bg-purple-700 transition"
-            >
-              Generate Summary
-            </button>
-          )}
-  
-          {loadingSummary && (
-            <p className="text-gray-600 animate-pulse mt-2">
-              Generating summary...
-            </p>
-          )}
-  
-          {summary && (
-            <pre className="whitespace-pre-wrap text-gray-700 mt-3 text-sm leading-relaxed">
-              {summary}
-            </pre>
-          )}
-        </div>
-  
-        {/* Actions */}
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
-  
-          {/* View Notice */}
-          {notice.link && (
-            <a
-              href={notice.link}
-              target="_blank"
-              rel="noreferrer"
-              className="flex items-center justify-center gap-2 px-6 py-3 
-                         bg-blue-600 text-white rounded-xl font-semibold
-                         shadow hover:bg-blue-700 hover:shadow-lg transition-all"
-            >
-              📄 View Official Notice
-            </a>
-          )}
-  
-          {/* Share */}
-          <button
-            onClick={() => handleShare(notice)}
-            className="flex items-center justify-center gap-2 px-6 py-3
-                       bg-green-500 text-white rounded-xl font-semibold
-                       shadow hover:bg-green-600 hover:shadow-lg transition-all"
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-cyan-900 to-black">
+      <div className="max-w-3xl mx-auto px-4 py-10">
+
+        {/* Back */}
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1 
+          text-cyan-400 font-medium hover:underline"
+        >
+          ← Back to Notices
+        </Link>
+
+        {/* Main Card */}
+        <div
+          className="mt-6 bg-black/50 backdrop-blur-xl 
+          rounded-2xl shadow-2xl p-6 
+          border border-white/10"
+        >
+          {/* Title */}
+          <h1
+            className="text-2xl sm:text-3xl font-extrabold leading-snug 
+            bg-gradient-to-r from-emerald-300 to-cyan-300 
+            bg-clip-text text-transparent"
           >
-            🔗 Share Notice
-          </button>
+            {notice.title}
+          </h1>
+
+          {/* Meta */}
+          <div className="flex flex-wrap items-center gap-3 mt-4">
+            <span
+              className="text-sm px-3 py-1 rounded-full 
+              text-white bg-gradient-to-r 
+              from-emerald-500 to-cyan-500"
+            >
+              {notice.category || "General"}
+            </span>
+
+            <span className="text-sm text-gray-400 flex items-center gap-1">
+              📅 {new Date(notice.date).toLocaleDateString()}
+            </span>
+          </div>
+
+          <hr className="my-6 border-white/10" />
+
+          {/* Description */}
+          <p className="text-gray-300 leading-relaxed text-base sm:text-lg">
+            This notice has been officially published by
+            <span className="font-semibold text-gray-100">
+              {" "}IIIT Bhopal
+            </span>.
+            Please refer to the official document for complete details.
+          </p>
+
+          {/* 🧠 AI Summary */}
+          <div
+            className="mt-8 p-5 rounded-xl 
+            bg-black/40 backdrop-blur 
+            border border-white/10"
+          >
+            <h2 className="text-xl font-bold mb-3 flex items-center gap-2 text-gray-100">
+              🧠 AI Summary
+            </h2>
+
+            {!summary && !loadingSummary && (
+              <button
+                onClick={generateSummary}
+                className="px-4 py-2 
+                bg-emerald-600 text-white rounded-lg 
+                hover:bg-emerald-700 transition"
+              >
+                Generate Summary
+              </button>
+            )}
+
+            {loadingSummary && (
+              <p className="text-gray-400 animate-pulse mt-2">
+                Generating summary...
+              </p>
+            )}
+
+            {summary && (
+              <pre
+                className="whitespace-pre-wrap text-gray-300 
+                mt-3 text-sm leading-relaxed"
+              >
+                {summary}
+              </pre>
+            )}
+          </div>
+
+          {/* Actions */}
+          <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-4">
+
+            {/* View Notice */}
+            {notice.link && (
+              <a
+                href={notice.link}
+                target="_blank"
+                rel="noreferrer"
+                className="flex items-center justify-center gap-2 
+                px-6 py-3 bg-cyan-600 text-white 
+                rounded-xl font-semibold
+                shadow hover:bg-cyan-700 
+                hover:shadow-xl transition-all"
+              >
+                📄 View Official Notice
+              </a>
+            )}
+
+            {/* Share */}
+            <button
+              onClick={() => handleShare(notice)}
+              className="flex items-center justify-center gap-2 
+              px-6 py-3 bg-emerald-600 text-white 
+              rounded-xl font-semibold
+              shadow hover:bg-emerald-700 
+              hover:shadow-xl transition-all"
+            >
+              🔗 Share Notice
+            </button>
+          </div>
         </div>
       </div>
     </div>

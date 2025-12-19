@@ -1,12 +1,9 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
 import api from "../api";
 import {
   PieChart, Pie, Cell, Tooltip, Legend,
   BarChart, Bar, XAxis, YAxis, CartesianGrid,
 } from "recharts";
-const API_URL = import.meta.env.VITE_API_URL;
-
 
 export default function Dashboard() {
   const [categoryStats, setCategoryStats] = useState([]);
@@ -18,6 +15,7 @@ export default function Dashboard() {
     const cat = await api.get("/api/notices/stats/categories");
     const t   = await api.get("/api/notices/stats/total");
     const w   = await api.get("/api/notices/stats/weekly");
+
     setCategoryStats(
       cat.data.map((item) => ({
         name: item._id,
@@ -33,69 +31,139 @@ export default function Dashboard() {
     fetchStats();
   }, []);
 
-  // Colors for pie chart
-  const COLORS = ["#6366F1", "#F97316", "#10B981", "#EF4444", "#3B82F6", "#EAB308", "#A855F7"];
+  // Chart colors
+  const COLORS = [
+    "#34D399", "#22D3EE", "#60A5FA",
+    "#A78BFA", "#F472B6", "#FBBF24", "#F87171"
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
-      
-      {/* Heading */}
-      <h1 className="text-4xl font-extrabold text-center mb-8 bg-linear-to-r from-purple-600 to-blue-500 bg-clip-text text-transparent">
-        📊 Notice Statistics Dashboard
-      </h1>
+    <div className="min-h-screen bg-gradient-to-br from-emerald-900 via-cyan-900 to-black">
+      <div className="max-w-5xl mx-auto px-4 py-10">
 
-      {/* Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-        
-        <div className="bg-white shadow-lg p-6 rounded-xl border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-600">Total Notices</h2>
-          <p className="text-5xl font-bold text-blue-600 mt-2">{total}</p>
-        </div>
+        {/* Heading */}
+        <h1
+          className="text-3xl sm:text-4xl font-extrabold text-center mb-10
+          bg-gradient-to-r from-emerald-300 to-cyan-300
+          bg-clip-text text-transparent"
+        >
+          📊 Notice Statistics Dashboard
+        </h1>
 
-        <div className="bg-white shadow-lg p-6 rounded-xl border border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-600">Added This Week</h2>
-          <p className="text-5xl font-bold text-purple-600 mt-2">{weekly}</p>
-        </div>
+        {/* Summary Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
 
-      </div>
-
-      {/* Pie Chart Section */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200 mb-10">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Category Distribution</h2>
-
-        <PieChart width={380} height={350}>
-          <Pie
-            data={categoryStats}
-            cx={180}
-            cy={160}
-            outerRadius={120}
-            fill="#8884d8"
-            dataKey="value"
-            label
+          {/* Total Notices */}
+          <div
+            className="bg-black/50 backdrop-blur-xl
+            p-6 rounded-2xl border border-white/10
+            shadow-xl hover:shadow-2xl transition"
           >
-            {categoryStats.map((entry, index) => (
-              <Cell key={index} fill={COLORS[index % COLORS.length]} />
-            ))}
-          </Pie>
+            <h2 className="text-lg font-semibold text-gray-400">
+              Total Notices
+            </h2>
+            <p className="text-5xl font-bold mt-3
+              bg-gradient-to-r from-cyan-400 to-emerald-400
+              bg-clip-text text-transparent">
+              {total}
+            </p>
+          </div>
 
-          <Tooltip />
-          <Legend />
-        </PieChart>
+          {/* Weekly Notices */}
+          <div
+            className="bg-black/50 backdrop-blur-xl
+            p-6 rounded-2xl border border-white/10
+            shadow-xl hover:shadow-2xl transition"
+          >
+            <h2 className="text-lg font-semibold text-gray-400">
+              Added This Week
+            </h2>
+            <p className="text-5xl font-bold mt-3
+              bg-gradient-to-r from-purple-400 to-pink-400
+              bg-clip-text text-transparent">
+              {weekly}
+            </p>
+          </div>
+        </div>
+
+        {/* Category Distribution */}
+        <div
+          className="bg-black/50 backdrop-blur-xl
+          p-6 rounded-2xl border border-white/10
+          shadow-xl mb-12"
+        >
+          <h2 className="text-xl font-semibold mb-6 text-gray-200 text-center">
+            Category Distribution
+          </h2>
+
+          <div className="flex justify-center overflow-x-auto">
+            <PieChart width={360} height={320}>
+              <Pie
+                data={categoryStats}
+                cx="50%"
+                cy="50%"
+                outerRadius={110}
+                dataKey="value"
+                label
+              >
+                {categoryStats.map((_, index) => (
+                  <Cell
+                    key={index}
+                    fill={COLORS[index % COLORS.length]}
+                  />
+                ))}
+              </Pie>
+
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#020617",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "10px",
+                  color: "#fff",
+                }}
+              />
+              <Legend />
+            </PieChart>
+          </div>
+        </div>
+
+        {/* Weekly Bar Chart */}
+        <div
+          className="bg-black/50 backdrop-blur-xl
+          p-6 rounded-2xl border border-white/10
+          shadow-xl"
+        >
+          <h2 className="text-xl font-semibold mb-6 text-gray-200 text-center">
+            Weekly Notice Activity
+          </h2>
+
+          <div className="flex justify-center overflow-x-auto">
+            <BarChart
+              width={380}
+              height={300}
+              data={[{ name: "Last 7 Days", notices: weekly }]}
+            >
+              <CartesianGrid strokeDasharray="3 3" stroke="#334155" />
+              <XAxis dataKey="name" stroke="#CBD5E1" />
+              <YAxis allowDecimals={false} stroke="#CBD5E1" />
+              <Tooltip
+                contentStyle={{
+                  backgroundColor: "#020617",
+                  border: "1px solid rgba(255,255,255,0.1)",
+                  borderRadius: "10px",
+                  color: "#fff",
+                }}
+              />
+              <Bar
+                dataKey="notices"
+                fill="#22D3EE"
+                radius={[8, 8, 0, 0]}
+              />
+            </BarChart>
+          </div>
+        </div>
+
       </div>
-
-      {/* Weekly Chart (Bar) */}
-      <div className="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-        <h2 className="text-xl font-semibold mb-4 text-gray-700">Weekly Notice Activity</h2>
-        
-        <BarChart width={400} height={300} data={[{ name: "Last 7 Days", notices: weekly }]}>
-          <CartesianGrid strokeDasharray="3 3" />
-          <XAxis dataKey="name" />
-          <YAxis allowDecimals={false} />
-          <Tooltip />
-          <Bar dataKey="notices" fill="#6366F1" />
-        </BarChart>
-      </div>
-
     </div>
   );
 }
