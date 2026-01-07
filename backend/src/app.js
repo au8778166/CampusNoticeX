@@ -25,6 +25,10 @@ app.use("/api/notices", noticeRoutes);
 app.use("/api/user", userRoutes);
 app.use("/api/ai", aiRoutes);
 
+cron.schedule("*/10 * * * *", async () => {
+      console.log("⏳ Cron Job: Scraping website...");
+      await scrape();
+    });
 
 
 
