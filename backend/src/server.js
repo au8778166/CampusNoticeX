@@ -23,11 +23,7 @@ async function start() {
     await scrape();
 
     // Run scraper every 10 minutes
-    cron.schedule("*/10 * * * *", async () => {
-      console.log("⏳ Cron Job: Scraping website...");
-      await scrape();
-    });
-
+    
   } catch (err) {
     console.error("Server startup error:", err.message);
   }
