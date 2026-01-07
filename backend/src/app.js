@@ -8,6 +8,7 @@ import authRoutes from "./routes/authRoutes.js";
 import userRoutes from "./routes/userRoutes.js"
 import aiRoutes from "./routes/aiRoutes.js";
 import { scrape } from "./puppeteer/puppeteer.js";
+import cron from "node-cron";
 
 
 const app = express();
